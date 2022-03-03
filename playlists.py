@@ -3,8 +3,11 @@
 # Sample Python code for youtube.playlists.update
 # See instructions for running these code samples locally:
 # https://developers.google.com/explorer-help/code-samples#python
+# edited by onleft1 and AToska21
+
 
 import os
+import time
 
 import pickle
 import google_auth_oauthlib.flow
@@ -20,7 +23,7 @@ scopes = ["https://www.googleapis.com/auth/youtube.force-ssl","https://www.googl
 credentials = None
 
 # token.pickle stores the user's credentials from previously successful logins - from the file
-if os.path.exists('token2.pickle'):
+if os.path.exists('token.pickle'):
     print('Loading Credentials From File...')
     with open('token2.pickle', 'rb') as token: #rb sends for read bite file (not a text)
         credentials = pickle.load(token)
@@ -64,7 +67,9 @@ request = youtube.playlistItems().insert(
         }
     )
 
+
 response = request.execute()
+time.sleep(6)
 print(response)
 
 

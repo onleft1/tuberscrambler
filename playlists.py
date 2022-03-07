@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Sample Python code for youtube.playlists.update
-# See instructions for running these code samples locally:
-# https://developers.google.com/explorer-help/code-samples#python
-
 import os
-
 import pickle
+import random
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -15,14 +11,21 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
+### Setting Variables
+# Authentication
 scopes = ["https://www.googleapis.com/auth/youtube.force-ssl","https://www.googleapis.com/auth/youtube.readonly"]
-
 credentials = None
 
+# Request
+n=input("How many videos would you like to randomize? ") #number of items to randomize
+plist = input("Insert the playplist code: ")
+
+### Authentication ---------------------------------------------------------------------------------------
 # token.pickle stores the user's credentials from previously successful logins - from the file
-if os.path.exists('token2.pickle'):
+print("Authenticating ---")
+if os.path.exists('token.pickle'):
     print('Loading Credentials From File...')
-    with open('token2.pickle', 'rb') as token: #rb sends for read bite file (not a text)
+    with open('token.pickle', 'rb') as token: #rb sends for read bite file (not a text)
         credentials = pickle.load(token)
 
 # If there are no valid credentials available, then either refresh the token or log in.
@@ -42,29 +45,62 @@ if not credentials or not credentials.valid:
         credentials = flow.credentials
 
         # Save the credentials for the next run
-        with open('token2.pickle', 'wb') as f:
+        with open('token.pickle', 'wb') as f:
             print('Saving Credentials for Future Use...')
             pickle.dump(credentials, f)
 
-youtube = build("youtube", "V3", credentials=credentials)
-
+youtube = build("youtube", "v3", credentials=credentials)
+print("Authenticaton complete ---")
 ### -------------------------------------------------------------------
+print("")
+print("Request and reordering...")
+### List of videos > 50
+### From https://stackoverflow.com/questions/18804904/retrieve-all-videos-from-youtube-playlist-using-youtube-v3-api
 
-request = youtube.playlistItems().insert(
-        part="snippet",
-        body={
-          "snippet": {
-            "playlistId": "PLmMU0IJAD9NpiZfCSYIE_qMvTLxGx8yk-",
-            "position": 0,
-            "resourceId": {
-              "kind": "youtube#video",
-              "videoId": "M7FIvfx5J10"
+res = youtube.playlistItems().list(
+    part="snippet",
+    playlistId=plist,
+    maxResults="50"
+    ).execute()
+
+nextPageToken = res.get('nextPageToken')
+while ('nextPageToken' in res):
+    nextPage = youtube.playlistItems().list(
+    part="snippet",
+    playlistId=plist,
+    maxResults="50",
+    pageToken=nextPageToken
+    ).execute()
+    res['items'] = res['items'] + nextPage['items']
+
+    if 'nextPageToken' not in nextPage:
+        res.pop('nextPageToken', None)
+    else:
+        nextPageToken = nextPage['nextPageToken']
+
+### Create a random list and print
+rdlist = random.sample(range(len(res["items"])-1), n)
+#print(rdlist)
+print ("{:<3} {:<69} {:<28} {:<12} {:<28}".format("#",'id', 'etag','Video Id', 'Title'))
+for x in rdlist:
+    print("{:<3} {:<69} {:<28} {:<12} {:<28}".format(x,res["items"][x]["id"], res["items"][x]["etag"],res["items"][x]["snippet"]["resourceId"]["videoId"],res["items"][x]["snippet"]["title"][0:30]))
+
+for x in rdlist:
+    request = youtube.playlistItems().update(
+            part="snippet",
+            body={
+            "id": res["items"][x]["id"],
+            "snippet": {
+                "playlistId": plist,
+                "position": 0,
+                "resourceId": {
+                    "kind": "youtube#video",
+                    "videoId": res["items"][x]["snippet"]["resourceId"]["videoId"]
+                }
             }
-          }
-        }
-    )
+            }
+        )
+    response = request.execute()
 
-response = request.execute()
-print(response)
-
-
+# print(response)
+print("DONE!")

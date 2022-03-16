@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+#########################
+# TUBERSCRAMBLER
+# By onleft1 and AToska21
+# Also known as Christopher Ody and Andrea Toska
+# © AToska21 and onleft1 2022
+#########################
+
 # from importlib.metadata import files
 import os
 import pickle
@@ -35,16 +42,16 @@ def auth():
 
     if len(jsonlist) == 0:
         print()
-        print("-----> ERROR: OAuth key JSON file not found in folder.")
+        print("\033[1;31;47m -----> ERROR: OAuth key JSON file not found in folder. <-----")
         print()
-        print("Please save your JSON file into the same folder as TubeScrambler.")
+        print("\033[1;31;47m Please save your JSON file into the same folder as TubeScrambler.")
         print()
-        print("If you haven't created one, access https://console.cloud.google.com/apis/credentials and click on + Create Credentails --> OAuth Client ID and follow the key creation process. Download and save the JSON file into the same folder as TuberScrambler and run it again.")
-        print()
-        print()
+        print("\033[1;31;47m If you haven't created one, access https://console.cloud.google.com/apis/credentials and click on + Create Credentails --> OAuth Client ID and follow the key creation process. Download and save the JSON file into the same folder as TuberScrambler and run it again.")
         print()
         print()
-        input("Press Enter to exit...")
+        print()
+        print()
+        input("\033[1;31;47m Press Enter to exit...")
         exit()
 
     elif len(jsonlist) == 1:
@@ -63,14 +70,14 @@ def auth():
                 jsonfile = jsonlist[number1 - 1]
                 break
             except ValueError:
-                print("Invalid answer. It must be in a number within the range of 1-" + str(len(jsonlist)) + ".")
+                print("\033[1;31;47m Invalid answer. It must be in a number within the range of 1-" + str(len(jsonlist)) + ".")
         
     print("=== Arquivo JSON selecionado: " + jsonfile)
 
 
     ### Authentication ---------------------------------------------------------------------------------------
     # token.pickle stores the user's credentials from previously successful logins - from the file
-    print("Authenticating -----------")
+    print("\033[1;34;47m----------- Authenticating -----------")
     if os.path.exists(picklefile):
         print('Loading Credentials From File...')
         with open(picklefile, 'rb') as token: #rb sends for read bite file (not a text)
@@ -99,7 +106,7 @@ def auth():
 
     global youtube
     youtube = build("youtube", "v3", credentials=credentials)
-    print("Authenticaton complete ---")
+    print("\033[1;32;47m--- Authenticaton complete! ---")
 
 auth()
 
@@ -184,7 +191,7 @@ def shufflepl():
     except ValueError:
         print()
         print()
-        print("Your answer was 'in blank' or 'invalid'. Assuming 3 videos to randomize...")
+        print("\033[1;31;47m Your answer was 'in blank' or 'invalid'. Assuming 3 videos to randomize...")
         print()
         n = 3
 
@@ -227,6 +234,6 @@ def shufflepl():
     # print(response)
     print()
     print()
-    print("Done, enjoy! =)")
+    print("\033[1;31;47m Done, enjoy! =)")
 
 shufflepl()

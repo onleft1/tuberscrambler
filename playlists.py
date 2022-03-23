@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 #########################
@@ -7,23 +6,43 @@
 # Also known as Christopher Ody and Andrea Toska
 # © AToska21 and onleft1 2022
 #########################
-
-# from importlib.metadata import files
+# Importing modules
 import os
 import pickle
 import random
+from sys import argv
 import time
+import argparse
+
+# from importlib.metadata import files
 # from signal import pause
 # import google_auth_oauthlib.flow
 # import googleapiclient.discovery
-import googleapiclient.errors
+# import googleapiclient.errors
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
+from numpy import fromfile
 
+### Help and using arguments
+def argparser():
+    parser = argparse.ArgumentParser(description='TubeScrambler is a free software to shuffle YouTube playlists from your terminal.')
 
-### Authentication
+    parser.add_argument("-p", "--playlist", help="Number of the playlist.", default=-1, type=int)
+    parser.add_argument("-v", "--videos_to_shuffle", help="Number of videos to shuffle.", default=-1, type=int)
+
+    args = parser.parse_args() #gathering the arguments
+
+    #Creating variables
+    global argplists
+    global argvideos
+    argplists = args.playlist
+    argvideos = args.videos_to_shuffle
+
+argparser()
+
+## Authentication
 def auth():
     ### Setting Variables
     # Authentication
@@ -43,16 +62,16 @@ def auth():
 
     if len(jsonlist) == 0:
         print()
-        print("\033[1;31;47m -----> ERROR: OAuth key JSON file not found in folder. <-----")
+        print("-----> ERROR: OAuth key JSON file not found in folder.")
         print()
-        print("\033[1;31;47m Please save your JSON file into the same folder as TubeScrambler.")
+        print("Please save your JSON file into the same folder as TubeScrambler.")
         print()
-        print("\033[1;31;47m If you haven't created one, access https://console.cloud.google.com/apis/credentials and click on + Create Credentails --> OAuth Client ID and follow the key creation process. Download and save the JSON file into the same folder as TuberScrambler and run it again.")
-        print()
-        print()
+        print("If you haven't created one, access https://console.cloud.google.com/apis/credentials and click on + Create Credentails --> OAuth Client ID and follow the key creation process. Download and save the JSON file into the same folder as TuberScrambler and run it again.")
         print()
         print()
-        input("\033[1;31;47m Press Enter to exit...")
+        print()
+        print()
+        input("Press Enter to exit...")
         exit()
 
     elif len(jsonlist) == 1:
@@ -71,14 +90,14 @@ def auth():
                 jsonfile = jsonlist[number1 - 1]
                 break
             except ValueError:
-                print("\033[1;31;47m Invalid answer. It must be in a number within the range of 1-" + str(len(jsonlist)) + ".")
+                print("Invalid answer. It must be in a number within the range of 1-" + str(len(jsonlist)) + ".")
         
     print("=== Arquivo JSON selecionado: " + jsonfile)
 
 
     ### Authentication ---------------------------------------------------------------------------------------
     # token.pickle stores the user's credentials from previously successful logins - from the file
-    print("\033[1;34;47m----------- Authenticating -----------")
+    print("Authenticating -----------")
     if os.path.exists(picklefile):
         print('Loading Credentials From File...')
         with open(picklefile, 'rb') as token: #rb sends for read bite file (not a text)
@@ -107,12 +126,14 @@ def auth():
 
     global youtube
     youtube = build("youtube", "v3", credentials=credentials)
-    print("\033[1;32;47m--- Authenticaton complete! ---")
+    print("Authenticaton complete ---")
 
 auth()
 
-print("")
+print()
 print("Requesting and reordering...")
+print()
+print("List of Playlists:")
 
 ### Playlists
 def reqplaylists():
@@ -148,7 +169,12 @@ def reqplaylists():
         print("{:<2} {:<69} {:<28}".format(b, rep["snippet"]["title"], rep["id"])) #, rep["etag"],rep["snippet"]["resourceId"]["videoId"],rep["snippet"]["title"][0:30]))
         b=b+1
 
-    choose=int(input("Type the number of the playlist: "))
+    global choose
+    if argplists != -1:
+        choose=argplists
+    else:
+        choose=int(input("Type the number of the playlist: "))
+    
     global plist
     plist = pllist["items"][choose]["id"]
 
@@ -183,16 +209,23 @@ def shufflepl():
             nextPageToken = nextPage['nextPageToken']
 
     # Set the number of videos to randomize
+    
+    if argvideos != -1:
+        n = argvideos
+    else:
+        n = 0
     try:
         print("Your playlist has "+ str(len(res["items"])) +" videos.")
-        n = int(input("How many videos would you like to randomize? [No/invalid answer = 3]"))
+        
+        if n != argvideos:
+            n = int(input("How many videos would you like to randomize? [No/invalid answer = 3]"))
         if n > len(res["items"]):
             print("Your playlist has less videos than " + str(n) + " video. Your playlist has " + str(len(res["items"])) + " videos. Therefore, I will randomize them all.")
             n = len(res["items"])
     except ValueError:
         print()
         print()
-        print("\033[1;31;47m Your answer was 'in blank' or 'invalid'. Assuming 3 videos to randomize...")
+        print("Your answer was 'in blank' or 'invalid'. Assuming 3 videos to randomize...")
         print()
         n = 3
 
@@ -235,6 +268,14 @@ def shufflepl():
     # print(response)
     print()
     print()
-    print("\033[1;31;47m Done, enjoy! =)")
+    
+    if argplists == -1 and argvideos == -1:
+        print("######################################################")
+        print("Next time you can run this command from your terminal:")
+        print("--> WINDOWS: playlists -p " + str(choose) + " -v " + str(n))
+        print("--> LINUX:   python3 playlists.py -p " + str(choose) + " -v " + str(n))
+        print("######################################################")
+        print()
+    print("Done, enjoy! =)")
 
 shufflepl()

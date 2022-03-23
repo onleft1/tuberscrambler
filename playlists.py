@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+#########################
+# TUBERSCRAMBLER
+# By onleft1 and AToska21
+# Also known as Christopher Ody and Andrea Toska
+# © AToska21 and onleft1 2022
+#########################
 # Importing modules
 import os
 import pickle

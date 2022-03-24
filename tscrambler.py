@@ -25,16 +25,23 @@ def argparser():
 
     parser.add_argument("-p", "--playlist", help="Number of the playlist.", default=-1, type=int)
     parser.add_argument("-v", "--videos_to_shuffle", help="Number of videos to shuffle.", default=-1, type=int)
+    parser.add_argument("-w", "--work_dir", help="Set the work directory.", default="noone", type=str)
 
     args = parser.parse_args() #gathering the arguments
 
     #Creating variables
     global argplists
     global argvideos
+    global argdir
     argplists = args.playlist
     argvideos = args.videos_to_shuffle
+    argdir = args.work_dir
 
 argparser()
+
+### Fixing paths and set work diretory "Local"
+if argdir != "noone":
+    os.chdir(argdir)
 
 ## Authentication
 def auth():

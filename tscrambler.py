@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Importing modules
+from http.client import BAD_REQUEST
 import os
 import pickle
 import random
@@ -10,12 +11,14 @@ import argparse
 
 # from importlib.metadata import files
 # from signal import pause
-import google_auth_oauthlib.flow
+# import google_auth_oauthlib.flow
+# import google.auth.exceptions
 # import googleapiclient.discovery
 # import googleapiclient.errors
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError #for try command on Authenticating
 from googleapiclient.discovery import build
 from numpy import fromfile
 
@@ -46,9 +49,11 @@ if argdir != "noone":
 ## Authentication
 def auth():
     ### Setting Variables
+    
     # Authentication
     scopes = ["https://www.googleapis.com/auth/youtube.force-ssl","https://www.googleapis.com/auth/youtube.readonly"]
     credentials = None
+    global picklefile
     picklefile = "token.pickle"
 
     currentpath = os.getcwd()
@@ -98,11 +103,12 @@ def auth():
 
     ### Authentication ---------------------------------------------------------------------------------------
     # token.pickle stores the user's credentials from previously successful logins - from the file
-    print("Authenticating -----------")
+    print("Authenticating 2022 -----------")
     if os.path.exists(picklefile):
         print('Loading Credentials From File...')
         with open(picklefile, 'rb') as token: #rb sends for read bite file (not a text)
             credentials = pickle.load(token)
+    
 
     # If there are no valid credentials available, then either refresh the token or log in.
     if not credentials or not credentials.valid:
@@ -129,7 +135,13 @@ def auth():
     youtube = build("youtube", "v3", credentials=credentials)
     print("Authenticaton complete ---")
 
-auth()
+try:
+    auth()
+
+except RefreshError as excinfo:
+        os.remove(picklefile)
+        print("Pickle file removed. Refreshing token...")
+        auth()
 
 print()
 print("Requesting and reordering...")
